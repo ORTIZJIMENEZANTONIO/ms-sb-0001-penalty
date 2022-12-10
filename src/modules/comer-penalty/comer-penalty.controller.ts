@@ -5,6 +5,7 @@ import { MessagePattern } from '@nestjs/microservices';
 
 import { ComerPenaltyService } from './comer-penalty.service';
 import { FinalDate } from './dto/get-final-date.dto';
+import { ReleasePenaltyDto } from './dto/release-penalty.dto';
 
 @Controller('comer-penalty')
 export class ComerPenaltyController {
@@ -20,7 +21,9 @@ export class ComerPenaltyController {
   async updatePenalty() {}
 
   @MessagePattern({ cmd: 'releasePenalty' })
-  async releasePenalty() {}
+  async releasePenalty(data: ReleasePenaltyDto) {
+    return await this.service.releasePenalty(data);
+  }
 
   @MessagePattern({ cmd: 'getFinalDate' })
   async getFinalDate(data: FinalDate) {

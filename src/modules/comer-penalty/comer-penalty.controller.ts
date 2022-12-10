@@ -1,32 +1,32 @@
-import { Controller, Inject } from "@nestjs/common";
-import { WINSTON_MODULE_PROVIDER } from "nest-winston";
-import { Logger } from "winston";
-import { MessagePattern } from "@nestjs/microservices";
+import { Controller, Inject } from '@nestjs/common';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
+import { MessagePattern } from '@nestjs/microservices';
 
-import { ComerPenaltyService } from "./comer-penalty.service";
-import { FinalDate } from "./dto/get-final-date.dto";
+import { ComerPenaltyService } from './comer-penalty.service';
+import { FinalDate } from './dto/get-final-date.dto';
 
 @Controller('comer-penalty')
 export class ComerPenaltyController {
   constructor(
     private readonly service: ComerPenaltyService,
-    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
-  
-  @MessagePattern({ cmd: "registerPenalty" })
+
+  @MessagePattern({ cmd: 'registerPenalty' })
   async registerPenalty() {}
 
-  @MessagePattern({ cmd: "updatePenalty" })
+  @MessagePattern({ cmd: 'updatePenalty' })
   async updatePenalty() {}
 
-  @MessagePattern({ cmd: "releasePenalty" })
+  @MessagePattern({ cmd: 'releasePenalty' })
   async releasePenalty() {}
 
-  @MessagePattern({ cmd: "getFinalDate" })
+  @MessagePattern({ cmd: 'getFinalDate' })
   async getFinalDate(data: FinalDate) {
-    return '2022-12-12';
+    return await this.service.getFinalDate(data);
   }
 
-  @MessagePattern({ cmd: "penaltyReverse" })
+  @MessagePattern({ cmd: 'penaltyReverse' })
   async penaltyReverse() {}
 }

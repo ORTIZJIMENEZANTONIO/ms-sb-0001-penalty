@@ -1,4 +1,4 @@
 export class FinalDate {
   penaltyId: Number;
-  penaltyDate: String;
+  penaltyDate: Date;
 }

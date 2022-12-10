@@ -8,6 +8,7 @@ import { configService } from "./shared/config/config.service";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { ComerPenaltyModule } from './modules/comer-penalty/comer-penalty.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AppService } from "./app.service";
         new winston.transports.Console({ level: "debug" }),
       ],
     }),
+    ComerPenaltyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

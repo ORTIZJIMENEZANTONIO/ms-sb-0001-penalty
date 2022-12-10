@@ -15,6 +15,7 @@ const winston = require("winston");
 const config_service_1 = require("./shared/config/config.service");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
+const comer_penalty_module_1 = require("./modules/comer-penalty/comer-penalty.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
@@ -45,6 +46,7 @@ AppModule = __decorate([
                     new winston.transports.Console({ level: "debug" }),
                 ],
             }),
+            comer_penalty_module_1.ComerPenaltyModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

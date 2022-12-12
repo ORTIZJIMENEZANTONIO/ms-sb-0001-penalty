@@ -4,8 +4,11 @@ import { Logger } from 'winston';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { ComerPenaltyService } from './comer-penalty.service';
-import { FinalDate } from './dto/get-final-date.dto';
+import { FinalDateDto } from './dto/get-final-date.dto';
 import { ReleasePenaltyDto } from './dto/release-penalty.dto';
+import { UpdatePenaltyDto } from './dto/update-penaly.dto';
+import { RegisterPenaltyDto } from './dto/register-penalty.dto';
+import { ReversePenaltyDto } from './dto/reverse-penalty.dto';
 
 @Controller('comer-penalty')
 export class ComerPenaltyController {
@@ -15,10 +18,14 @@ export class ComerPenaltyController {
   ) {}
 
   @MessagePattern({ cmd: 'registerPenalty' })
-  async registerPenalty() {}
+  async registerPenalty(data: RegisterPenaltyDto) {
+    return await this.service.registerPenalty(data);
+  }
 
   @MessagePattern({ cmd: 'updatePenalty' })
-  async updatePenalty() {}
+  async updatePenalty(data: UpdatePenaltyDto) {
+    return await this.service.updatePenalty(data);
+  }
 
   @MessagePattern({ cmd: 'releasePenalty' })
   async releasePenalty(data: ReleasePenaltyDto) {
@@ -26,10 +33,12 @@ export class ComerPenaltyController {
   }
 
   @MessagePattern({ cmd: 'getFinalDate' })
-  async getFinalDate(data: FinalDate) {
+  async getFinalDate(data: FinalDateDto) {
     return await this.service.getFinalDate(data);
   }
 
   @MessagePattern({ cmd: 'penaltyReverse' })
-  async penaltyReverse() {}
+  async penaltyReverse(data: ReversePenaltyDto) {
+    return await this.service.penaltyReverse(data);
+  }
 }

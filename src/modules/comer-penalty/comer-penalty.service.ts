@@ -4,13 +4,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
-import { FinalDate } from './dto/get-final-date.dto';
+
+import { FinalDateDto } from './dto/get-final-date.dto';
 import { ComerTPenaltyEntity } from './entities/comer-tpenalty.entity';
 import { ReleasePenaltyDto } from './dto/release-penalty.dto';
 import { ComerClientEntity } from './entities/comer-client.entity';
 import { ComerPenaltyHisEntity } from './entities/comer-penalty-his.entity';
 import { ComerPenaltyEntity } from './entities/comer-penalty.entity';
-import { userInfo } from 'os';
+import { UpdatePenaltyDto } from './dto/update-penaly.dto';
+import { RegisterPenaltyDto } from './dto/register-penalty.dto';
+import { ReversePenaltyDto } from './dto/reverse-penalty.dto';
 
 @Injectable()
 export class ComerPenaltyService {
@@ -26,9 +29,28 @@ export class ComerPenaltyService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     @InjectMetric('comer_penalty_served') public counter: Counter<string>,
   ) {}
-  async registerPenalty() {}
+  async registerPenalty(data: RegisterPenaltyDto) {
+    const {
+      clientId,
+      eventId,
+      publicLot,
+      penaltyDate,
+      penaltyId,
+      observations,
+      penaltyUser,
+    } = data;
+    let pMsgProcess = 1;
+    let pStatusProcess = `Se registro la penalización para el cliente : ${clientId}`;
+  }
 
-  async updatePenalty() {}
+  async updatePenalty(data: UpdatePenaltyDto) {
+    const { clientId, releaseDate, userRelease, releaseCause } = data;
+    const penalties = await this.entity
+      .createQueryBuilder()
+      .where(`ID_CLIENTE = ${clientId}`);
+    console.log(penalties);
+    return 'ok';
+  }
 
   async releasePenalty(data: ReleasePenaltyDto) {
     const { releaseDate } = data;
@@ -51,7 +73,7 @@ export class ComerPenaltyService {
       .where(`LISTA_NEGRA = 'S'`)
       .andWhere(`FEC_INI_PENALIZACION <= '${releaseDate}'`);
     const clients = await clientsQuery.getRawMany();
-    
+
     for (const client of clients) {
       // Historico de Penalizacion
       const penalty = await this.entity.query(`SELECT
@@ -106,7 +128,7 @@ export class ComerPenaltyService {
     return message;
   }
 
-  async getFinalDate(data: FinalDate): Promise<Date> {
+  async getFinalDate(data: FinalDateDto): Promise<Date> {
     const { penaltyId, penaltyDate } = data;
     const lvDaysQuery = this.entityTPenalty
       .createQueryBuilder()
@@ -122,5 +144,5 @@ export class ComerPenaltyService {
     return new Date(lvFinalDate);
   }
 
-  async penaltyReverse() {}
+  async penaltyReverse(data: ReversePenaltyDto) {}
 }

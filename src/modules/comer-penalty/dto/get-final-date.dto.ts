@@ -1,4 +1,4 @@
-export class FinalDate {
+export class FinalDateDto {
   penaltyId: Number;
   penaltyDate: Date;
 }

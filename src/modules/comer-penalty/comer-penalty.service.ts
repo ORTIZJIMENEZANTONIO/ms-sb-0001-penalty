@@ -29,6 +29,7 @@ export class ComerPenaltyService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     @InjectMetric('comer_penalty_served') public counter: Counter<string>,
   ) {}
+
   async registerPenalty(data: RegisterPenaltyDto) {
     const {
       clientId,
@@ -45,11 +46,72 @@ export class ComerPenaltyService {
 
   async updatePenalty(data: UpdatePenaltyDto) {
     const { clientId, releaseDate, userRelease, releaseCause } = data;
-    const penalties = await this.entity
-      .createQueryBuilder()
+    const penaltiesQuery = this.entity
+      .createQueryBuilder('p')
+      .select([
+        `FECHA_INICIAL as "startDate"`,
+        `FECHA_FINAL as "endDate"`,
+        `ID_CLIENTE as "clientId"`,
+        `ID_PENALIZACION as "penaltyId"`,
+        `ID_EVENTO as "eventId"`,
+        `LOTE_PUBLICO as "publicLot"`,
+        `TIPO_PROCESO as "typeProcess"`,
+        `USUARIO as "user"`,
+        `REFE_OFICIO_OTRO as "refeOfficeOther"`,
+        `USR_PENALIZA as "userPenalty"`,
+        `FEC_PENALIZA as "penaltiDate"`,
+      ])
       .where(`ID_CLIENTE = ${clientId}`);
-    console.log(penalties);
-    return 'ok';
+    const penalties = await penaltiesQuery.getRawMany();
+    let pStatusProcess = 1;
+    let pMsgProcess = `Se liberó de penalización el cliente número  : ${clientId} en la fecha ${releaseDate}`;
+    const historicPenalty = [];
+    const penaltyDetails = [];
+    const clientsCatalogue = [];
+    const message = {
+      historicPenalty: '',
+      penaltyDetails: '',
+      clientsCatalogue: '',
+      result: pMsgProcess
+    };
+    // agregar a la validación que clientId sea un número positivo
+    for (const pe of penalties) {
+      console.log(pe);
+      const body = {
+        ...pe,
+        releaseDate,
+        userRelease,
+        releaseCause,
+      };
+      historicPenalty.push(await this.entityHis.save(body));
+
+      // Detalle de penalizacion
+      penaltyDetails.push(
+        await this.entity.delete({
+          clientId: pe.clientId,
+        }),
+      );
+
+      // Catalogo de clientes
+      const updated = this.entity.query(`
+        UPDATE sera.COMER_CLIENTES
+        SET
+          LISTA_NEGRA = 'N',
+          FECHA_LISTA_NEGRA = NULL,
+          FEC_INI_PENALIZACION = NULL,
+          FEC_FIN_PENALIZACION = NULL,
+          USU_LIBERA = '${userRelease}',
+          FECHA_LIBERACION = NOW()
+        WHERE
+          ID_CLIENTE = ${pe.clientId};
+      `);
+      clientsCatalogue.push(await updated);
+    }
+
+    message.historicPenalty = `${historicPenalty.length} registros guardados en histórico`;
+    message.penaltyDetails = `${penaltyDetails.length} registros de penalizaciones eliminados`;
+    message.clientsCatalogue = `${clientsCatalogue.length} registros de catálogo de clientes actualizados`;
+    return message;
   }
 
   async releasePenalty(data: ReleasePenaltyDto) {

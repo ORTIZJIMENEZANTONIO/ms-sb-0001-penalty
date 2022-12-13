@@ -347,7 +347,7 @@ export class ComerPenaltyService {
         WHERE
           ID_CLIENTE = ${clientId};
       `;
-      
+
       try {
         await this.entity.query(insrtPenaltyQuery);
         await this.entityClient.query(updtClientQuery);
@@ -519,5 +519,188 @@ export class ComerPenaltyService {
     return new Date(lvFinalDate);
   }
 
-  async penaltyReverse(data: ReversePenaltyDto) {}
+  async penaltyReverse(data: ReversePenaltyDto) {
+    const { clientId, eventId, publicLot } = data;
+    let pEstProcess = 1;
+    let pMsgProcess = `Se reverso la penalización para el cliente : ${clientId}`;
+    const lvValClient =
+      (
+        await this.entityClient
+          .createQueryBuilder()
+          .select([`COUNT(0) as "total"`])
+          .where(`ID_CLIENTE = ${clientId}`)
+          .getRawOne()
+      ).total ?? 0;
+
+    const lvValEvent =
+      (
+        await this.entityEvent
+          .createQueryBuilder()
+          .select([`COUNT(0) as "total"`])
+          .where(`ID_EVENTO = ${eventId}`)
+          .getRawOne()
+      ).total ?? 0;
+
+    const lvValLot =
+      (
+        await this.entityLot
+          .createQueryBuilder()
+          .select([`COUNT(0) as "total"`])
+          .where(`ID_EVENTO = ${eventId}`)
+          .andWhere(`LOTE_PUBLICO = ${publicLot}`)
+          .getRawOne()
+      ).total ?? 0;
+
+    if (lvValClient == 0)
+      return {
+        message: 'El Clinte no está registrado, verifique su información',
+        status: 0,
+      };
+
+    if (lvValEvent == 0)
+      return {
+        message: 'El Evento no está registrado, verifique su información',
+        status: 0,
+      };
+
+    if (lvValLot == 0)
+      return {
+        message: 'El Evento no está registrado, verifique su información',
+        status: 0,
+      };
+
+    if (pEstProcess == 1) {
+      const lvToTPenaHis =
+        (
+          await this.entity
+            .createQueryBuilder()
+            .select([`count(0) as "total"`])
+            .where(`ID_CLIENTE = ${clientId}`)
+            .getRawOne()
+        ).total ?? 0;
+
+      if (lvToTPenaHis > 0) {
+        const lvToTPenaHis =
+          (
+            await this.entity
+              .createQueryBuilder()
+              .select([`count(0) as "total"`])
+              .where(`ID_CLIENTE = ${clientId}`)
+              .andWhere(`LOTE_PUBLICO = ${publicLot}`)
+              .getRawOne()
+          ).total ?? 0;
+
+        if (lvToTPenaHis > 0) {
+          const updtClientQuery = `
+            UPDATE sera.COMER_CLIENTES
+            SET
+              LISTA_NEGRA = 'S',
+              FECHA_LISTA_NEGRA = null,
+              FEC_INI_PENALIZACION = null,
+              FEC_FIN_PENALIZACION = null,
+              ID_PENALIZACION = null,
+              USU_PENALIZA = null
+            WHERE
+              ID_CLIENTE = ${clientId};
+          `;
+          await this.entity
+            .createQueryBuilder()
+            .delete()
+            .from(ComerPenaltyEntity)
+            .where(`ID_EVENTO = ${eventId} `)
+            .andWhere(`LOTE_PUBLICO = ${publicLot}`)
+            .execute();
+          await this.entityClient.query(updtClientQuery);
+          const maxRegister =
+            (
+              await this.entityHis
+                .createQueryBuilder()
+                .select([`MAX(NO_REGISTRO) as "max"`])
+                .where(` ID_CLIENTE = ${clientId}`)
+                .getRawOne()
+            ).max ?? 0;
+          const datesUserQuery = (await this.entityHis
+            .createQueryBuilder()
+            .select([
+              `FECHA_INICIAL as "startDate"`,
+              `FECHA_FINAL as "endDate"`,
+              `USUARIO as "user"`,
+            ])
+            .where(` ID_CLIENTE = ${clientId}`)
+            .andWhere(`NO_REGISTRO = ${maxRegister}`)
+            .getRawOne()) ?? {
+            startDate: new Date().toISOString().substring(0, 10),
+            endDate: new Date().toISOString().substring(0, 10),
+            user: 'Dev',
+          };
+          const { startDate, endDate, user } = datesUserQuery;
+          await this.entity.query(`
+            INSERT INTO COMER_PENALIZACIONES (
+              ID_CLIENTE,
+              ID_LOTE,
+              ID_PENALIZACION,
+              ID_EVENTO,
+              LOTE_PUBLICO,
+              FECHA_INICIAL,
+              FECHA_FINAL,
+              TIPO_PROCESO,
+              REFE_OFICIO_OTRO,
+              USUARIO,
+              P_BANDERA
+            )
+              SELECT
+                ID_CLIENTE,
+                ID_LOTE,
+                ID_PENALIZACION,
+                ID_EVENTO,
+                LOTE_PUBLICO,
+                FECHA_INICIAL,
+                FECHA_FINAL,
+                TIPO_PROCESO,
+                REFE_OFICIO_OTRO,
+                USUARIO,
+                BANDERA
+              FROM
+                COMER_PENALIZACIONES_HIS
+              WHERE
+                ID_CLIENTE = ${clientId}
+                AND FECHA_FINAL >= '${new Date()
+                  .toISOString()
+                  .substring(0, 10)}'
+                AND NO_REGISTRO = (
+                  SELECT
+                    MAX(NO_REGISTRO)
+                  FROM
+                    COMER_PENALIZACIONES_HIS
+                  WHERE
+                    ID_CLIENTE = ${clientId}
+                );
+          `);
+
+          const updtClientQry = `
+            UPDATE sera.COMER_CLIENTES
+            SET
+              LISTA_NEGRA = 'S',
+              FECHA_LISTA_NEGRA = '${startDate}',
+              FEC_INI_PENALIZACION = '${startDate}',
+              FEC_FIN_PENALIZACION = '${endDate}',
+              USU_PENALIZA = '${user}'
+            WHERE
+              ID_CLIENTE = ${clientId};
+          `;
+          await this.entityClient.query(updtClientQry);
+          await this.entityHis
+            .createQueryBuilder()
+            .delete()
+            .from(ComerPenaltyHisEntity)
+            .where(`ID_CLIENTE = ${clientId} `)
+            .andWhere(`LOTE_PUBLICO = ${publicLot}`)
+            .execute();
+          console.log(datesUserQuery, maxRegister);
+        }
+      }
+    }
+
+    return pMsgProcess;
+  }
 }

@@ -8,6 +8,8 @@ import {
 import { ComerPenaltyController } from './comer-penalty.controller';
 import { ComerPenaltyService } from './comer-penalty.service';
 import { ComerClientEntity } from './entities/comer-client.entity';
+import { ComerEventEntity } from './entities/comer-event.entity';
+import { ComerLotEntity } from './entities/comer-lot.entity';
 import { ComerPenaltyHisEntity } from './entities/comer-penalty-his.entity';
 import { ComerPenaltyEntity } from './entities/comer-penalty.entity';
 import { ComerTPenaltyEntity } from './entities/comer-tpenalty.entity';
@@ -19,6 +21,8 @@ import { ComerTPenaltyEntity } from './entities/comer-tpenalty.entity';
       ComerClientEntity,
       ComerPenaltyHisEntity,
       ComerPenaltyEntity,
+      ComerEventEntity,
+      ComerLotEntity
     ]),
   ],
   controllers: [ComerPenaltyController],

@@ -3,7 +3,7 @@ export class RegisterPenaltyDto {
   eventId: Number;
   publicLot: Number;
   penaltyDate: Date;
-  penaltyId: Number;
+  penaltyId: number;
   observations: string;
   penaltyUser: string;
 }

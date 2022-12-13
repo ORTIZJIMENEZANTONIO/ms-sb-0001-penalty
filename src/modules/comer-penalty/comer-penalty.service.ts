@@ -694,9 +694,28 @@ export class ComerPenaltyService {
             .delete()
             .from(ComerPenaltyHisEntity)
             .where(`ID_CLIENTE = ${clientId} `)
-            .andWhere(`LOTE_PUBLICO = ${publicLot}`)
+            .andWhere(
+              `LFECHA_FINAL >=  ${new Date().toISOString().substring(0, 10)}`,
+            )
+            .andWhere(
+              `AND NO_REGISTRO = (
+                SELECT
+                  MAX(NO_REGISTRO)
+                FROM
+                  sera.COMER_PENALIZACIONES_HIS
+                WHERE
+                  ID_CLIENTE = P_ID_CLIENTE
+              )`,
+            )
             .execute();
-          console.log(datesUserQuery, maxRegister);
+        } else {
+          const registerNumber = await this.entityHis
+            .createQueryBuilder()
+            .select([` NO_REGISTRO as "num"`])
+            .where(`ID_CLIENTE = ${clientId}`)
+            .andWhere(`ID_EVENTO = ${eventId}`)
+            .andWhere(`LOTE_PUBLICO = ${publicLot}`)
+            .getRawOne();
         }
       }
     }

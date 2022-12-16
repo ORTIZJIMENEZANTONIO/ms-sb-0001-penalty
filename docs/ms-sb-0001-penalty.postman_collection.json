@@ -1,0 +1,166 @@
+{
+	"info": {
+		"_postman_id": "a1a29545-9a8e-4fc5-9ec0-d7d53ef3d31b",
+		"name": "ms-sb-0001-penalty",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6419147"
+	},
+	"item": [
+		{
+			"name": "comer-penalty",
+			"item": [
+				{
+					"name": "getFinalDate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"penaltyId\": 1,\n    \"penaltyDate\": \"2022-12-12\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/api/v1/comer-penalty/final-date",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"comer-penalty",
+								"final-date"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "releasePenalty",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"releaseDate\": \"2022-12-12\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/api/v1/comer-penalty/release",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"comer-penalty",
+								"release"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updatePenalty",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientId\": 46344,\n  \"releaseDate\": \"2022-12-12\",\n  \"userRelease\": \"User test\",\n  \"releaseCause\": \"Causa\"\n\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/api/v1/comer-penalty/",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"comer-penalty",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registerPenalty",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"eventId\": 1,\n    \"publicLot\": 1,\n    \"clientId\": 46344,\n    \"penaltyDate\": \"2022-12-12\",\n    \"penaltyId\": 4,\n    \"observations\": \"This is a test\",\n    \"penaltyUser\": \"Usuario\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/api/v1/comer-penalty/create",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"comer-penalty",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "reversePenalty",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientId\": 46344,\n  \"eventId\": 1,\n  \"publicLot\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{port}}/api/v1/comer-penalty/reverse",
+							"host": [
+								"{{port}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"comer-penalty",
+								"reverse"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "port",
+			"value": "http://localhost:3001"
+		}
+	]
+}
